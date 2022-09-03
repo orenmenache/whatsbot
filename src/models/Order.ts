@@ -1,3 +1,5 @@
+type OrderStatus = `OPEN` | `DELIVERED`;
+
 class Order {
     clientName: string;
     clientEmail: string;
@@ -7,6 +9,7 @@ class Order {
     bdpQuality: string;
     date: Date;
     sqlDate: string;
+    status?: OrderStatus;
     constructor(
         clientName: string,
         clientEmail: string,
@@ -14,7 +17,8 @@ class Order {
         bdpGender: string,
         bdpAge: string,
         bdpQuality: string,
-        date: Date
+        date: Date,
+        status?: OrderStatus
     ) {
         this.clientName = clientName;
         this.clientEmail = clientEmail;
@@ -24,9 +28,10 @@ class Order {
         this.bdpQuality = bdpQuality;
         this.date = date;
         this.sqlDate = this.toSQLDate(this.date);
+        this.status = status;
     }
     /**
-     * Take either Stripe or FreeBob order and put in DB
+     * Inserts order into DB
      */
     async processIncoming(db: any) {
         let sql = `
@@ -54,13 +59,18 @@ class Order {
         const sqlDate = `${year}-${month}-${day}`;
         return sqlDate;
     }
+    /**
+     * Checks if order with given params is in status OPEN
+     * @param  {any} db
+     * @returns Promise
+     */
     async checkIfProcessed(db: any): Promise<boolean> {
         let sql = `
             SELECT * FROM orders
             WHERE (
-                bdp_name = '${this.bdpName}' AND
-                client_name = '${this.clientName}' AND
-                order_date = '${this.sqlDate}' AND
+                bdpName = '${this.bdpName}' AND
+                clientName = '${this.clientName}' AND
+                orderDate = '${this.sqlDate}' AND
                 status = 'OPEN'
             )
         `;
@@ -76,4 +86,4 @@ class Order {
     done() {}
 }
 
-export default Order;
+export { Order, OrderStatus };

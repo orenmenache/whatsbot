@@ -7,7 +7,8 @@ import { STRIPE } from './api/stripeAPI';
 
 import { whatsAppAPI } from './api/whatsAppAPI';
 import Sheet from './classes/Sheet';
-import Order from './models/Order';
+import { Order } from './models/Order';
+import { getAllOpenOrders } from './schedule';
 
 /**
  * General:
@@ -44,23 +45,29 @@ const db = pool.promise();
 async function main() {
     //whatsAppAPI.chatBot(authPath, adminGroupId);
 
-    let dummyStr = 'Gooo';
+    let dummyStr = 'Fuu';
 
     let order = new Order(
         dummyStr,
         dummyStr,
         dummyStr,
         dummyStr,
-        '45',
+        '37',
         dummyStr,
         new Date()
     );
-    let isProcessed = await order.checkIfProcessed(db);
-    console.log(isProcessed);
-    //if (!isProcessed) {
-    //let result = await order.processIncoming(db);
-    //console.log(result[0]);
-    //}
+
+    let result = await getAllOpenOrders(db);
+    //console.log(result);
+
+    // let isProcessed = await order.checkIfProcessed(db);
+    // if (!isProcessed) {
+    //     console.warn(`Order hasn't been processed`);
+    //     let result = await order.processIncoming(db);
+    //     console.log(result[0]);
+    // } else {
+    //     console.log(`Order processed`);
+    // }
 }
 
 main();
