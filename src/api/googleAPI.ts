@@ -1,39 +1,23 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import { google } from 'googleapis';
+import Sheet from '../classes/Sheet';
+
+// Define Google Sheet specs
+const private_key = process.env.GOOGLE_PRIVATE_KEY ?? '';
+const client_email = process.env.GOOGLE_CLIENT_EMAIL ?? '';
+const sheet_id = process.env.GOOGLE_SHEET_ID_FREEBOBS ?? '';
 
 const googleAPI = {
-    createGoogleClient(
-        project_id: string,
-        private_key_id: string,
-        private_key: string,
-        client_email: string,
-        client_id: string,
-        client_x509_cert_url: string
-    ) {
-        const gscreds = {
-            type: 'service_account',
-            project_id: project_id,
-            private_key_id: private_key_id,
-            private_key: private_key,
-            client_email: client_email,
-            client_id: client_id,
-            auth_uri: 'https://accounts.google.com/o/oauth2/auth',
-            token_uri: 'https://oauth2.googleapis.com/token',
-            auth_provider_x509_cert_url:
-                'https://www.googleapis.com/oauth2/v1/certs',
-            client_x509_cert_url: client_x509_cert_url,
-        };
-
-        let client = new google.auth.JWT(
-            gscreds.client_email,
-            undefined,
-            gscreds.private_key,
-            ['https://www.googleapis.com/auth/spreadsheets']
-        );
+    createGoogleClient() {
+        let client = new google.auth.JWT(client_email, undefined, private_key, [
+            'https://www.googleapis.com/auth/spreadsheets',
+        ]);
 
         client.authorize(function (err: any) {
             //tokens unused for now
             if (err) {
-                console.log(`$c${err}`, 'color: red');
+                console.warn(err);
                 return false;
             }
             //console.log('client created');
@@ -113,6 +97,61 @@ const googleAPI = {
 
     isPositiveResponse(response: any) {
         return response.status >= 200 && response.status < 300;
+    },
+
+    async checkLast24Hours() {
+        const freeBobsSheet = await this.getFreeBobs();
+        const { values, locs } = freeBobsSheet;
+        let queryResult: string[][] = [];
+
+        for (let i = values.length - 1; i > 0; i--) {
+            let row: string[] = values[i];
+            let lastDate: string = row[locs['Timestamp']];
+            let isWithinRange: boolean =
+                this.isStrDateWithinLast24Hours(lastDate);
+            if (isWithinRange) {
+                queryResult.push(row);
+            }
+        }
+
+        return queryResult;
+    },
+
+    isStrDateWithinLast24Hours(date: string): boolean {
+        const now = new Date();
+        const nowParsed = Date.parse(now);
+
+        let dateTime: string[] = date.split(' ');
+        let splittedDate = dateTime[0].split('/');
+        let splittedTime = dateTime[1].split(':');
+
+        let year = Number(splittedDate[2]);
+        let month = Number(splittedDate[1]) - 1;
+        let day = Number(splittedDate[0]);
+        let hour = Number(splittedTime[0]);
+        let minute = Number(splittedTime[1]);
+
+        let dateDate = new Date(year, month, day, hour, minute);
+        let parsed = Date.parse(dateDate);
+
+        let gap = (nowParsed - parsed) / (60 * 60 * 1000);
+        return gap <= 24;
+    },
+
+    async getFreeBobs() {
+        const googleClient = this.createGoogleClient();
+
+        const freeBobsSheet = new Sheet(
+            googleClient,
+            sheet_id,
+            `Free Bobs`,
+            `Form Responses 1`,
+            1,
+            'A1:K1000'
+        );
+
+        await freeBobsSheet.getValues();
+        return freeBobsSheet;
     },
 };
 

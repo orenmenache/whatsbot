@@ -6,6 +6,7 @@ class Order {
     bdpAge: string;
     bdpQuality: string;
     date: Date;
+    sqlDate: string;
     constructor(
         clientName: string,
         clientEmail: string,
@@ -22,21 +23,17 @@ class Order {
         this.bdpAge = bdpAge;
         this.bdpQuality = bdpQuality;
         this.date = date;
+        this.sqlDate = this.toSQLDate(this.date);
     }
     /**
      * Take either Stripe or FreeBob order and put in DB
      */
     async processIncoming(db: any) {
-        const year = this.date.getFullYear();
-        const month = this.date.getMonth() + 1;
-        const day = this.date.getDate();
-        const sqlDate = `${year}-${month}-${day}`;
-
         let sql = `
             INSERT INTO orders
             VALUES (
                 DEFAULT,
-                '${sqlDate}',
+                '${this.sqlDate}',
                 '${this.clientName}',
                 '${this.clientEmail}',
                 '${this.bdpName}',
@@ -49,6 +46,28 @@ class Order {
 
         let result = await db.execute(sql);
         return result;
+    }
+    toSQLDate(date: Date): string {
+        const year = this.date.getFullYear();
+        const month = this.date.getMonth() + 1;
+        const day = this.date.getDate();
+        const sqlDate = `${year}-${month}-${day}`;
+        return sqlDate;
+    }
+    async checkIfProcessed(db: any): Promise<boolean> {
+        let sql = `
+            SELECT * FROM orders
+            WHERE (
+                bdp_name = '${this.bdpName}' AND
+                client_name = '${this.clientName}' AND
+                order_date = '${this.sqlDate}' AND
+                status = 'OPEN'
+            )
+        `;
+
+        let result = await db.execute(sql);
+        console.log(result);
+        return result[0].length > 0;
     }
     /**
      * Mark openOrder as done
