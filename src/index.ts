@@ -45,6 +45,18 @@ const db = pool.promise();
 async function main() {
     //whatsAppAPI.chatBot(authPath, adminGroupId);
 
+    const freeBobsSheet: Sheet = await googleAPI.getFreeBobs();
+    const locs = freeBobsSheet.locs;
+    const gCheck = googleAPI.checkLast24Hours(freeBobsSheet);
+    if (gCheck.length > 0) {
+        console.log(`New FreeBOB! Processing`);
+        let gOrders: Order[] = [];
+        gCheck.forEach((row) => {
+            let clientEmail = row[locs['Your email']];
+            let clientName = await db.execute(``);
+        });
+    }
+
     let dummyStr = 'Fuu';
 
     let order = new Order(
@@ -57,7 +69,7 @@ async function main() {
         new Date()
     );
 
-    let result = await getAllOpenOrders(db);
+    //let result = await getAllOpenOrders(db);
     //console.log(result);
 
     // let isProcessed = await order.checkIfProcessed(db);

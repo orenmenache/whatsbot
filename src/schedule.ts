@@ -1,5 +1,6 @@
 import sch from 'node-schedule';
 import { Client } from 'whatsapp-web.js';
+import { googleAPI } from './api/googleAPI';
 import { Order } from './models/Order';
 
 const cron: string = `0 */6 * * *`;

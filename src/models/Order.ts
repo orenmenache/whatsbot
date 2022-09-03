@@ -6,6 +6,7 @@ class Order {
     bdpName: string;
     bdpGender: string;
     bdpAge: string;
+    mentionAge: string;
     bdpQuality: string;
     date: Date;
     sqlDate: string;
@@ -16,6 +17,7 @@ class Order {
         bdpName: string,
         bdpGender: string,
         bdpAge: string,
+        mentionAge: string,
         bdpQuality: string,
         date: Date,
         status?: OrderStatus
@@ -25,6 +27,7 @@ class Order {
         this.bdpName = bdpName;
         this.bdpGender = bdpGender;
         this.bdpAge = bdpAge;
+        this.mentionAge = mentionAge;
         this.bdpQuality = bdpQuality;
         this.date = date;
         this.sqlDate = this.toSQLDate(this.date);
