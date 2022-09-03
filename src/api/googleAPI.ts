@@ -108,7 +108,10 @@ const googleAPI = {
             let date: Date = this.parseGoogleStrDate(row[locs['Timestamp']]);
             let isWithinRange: boolean = this.isStrDateWithinLast24Hours(date);
             if (isWithinRange) {
+                console.log(`${row[0]} FOUND!`);
                 queryResult.push(row);
+            } else {
+                console.log(`${row[0]} not in the last 24 hours`);
             }
         }
 

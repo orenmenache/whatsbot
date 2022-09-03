@@ -1,17 +1,18 @@
 type OrderStatus = `OPEN` | `DELIVERED`;
-
+type YESNO = 'YES' | 'NO';
 class Order {
     clientName: string;
     clientEmail: string;
     bdpName: string;
     bdpGender: string;
     bdpAge: string;
-    mentionAge: string;
+    mentionAge: YESNO;
     bdpQuality: string;
     date: Date;
     sqlDate: string;
     status?: OrderStatus;
     constructor(
+        date: Date,
         clientName: string,
         clientEmail: string,
         bdpName: string,
@@ -19,7 +20,6 @@ class Order {
         bdpAge: string,
         mentionAge: string,
         bdpQuality: string,
-        date: Date,
         status?: OrderStatus
     ) {
         this.clientName = clientName;
@@ -27,7 +27,7 @@ class Order {
         this.bdpName = bdpName;
         this.bdpGender = bdpGender;
         this.bdpAge = bdpAge;
-        this.mentionAge = mentionAge;
+        this.mentionAge = this.toSQL_YESNO(mentionAge);
         this.bdpQuality = bdpQuality;
         this.date = date;
         this.sqlDate = this.toSQLDate(this.date);
@@ -47,6 +47,7 @@ class Order {
                 '${this.bdpName}',
                 '${this.bdpGender}',
                 '${this.bdpAge}',
+                '${this.mentionAge}',
                 '${this.bdpQuality}',
                 DEFAULT
             );
@@ -61,6 +62,12 @@ class Order {
         const day = this.date.getDate();
         const sqlDate = `${year}-${month}-${day}`;
         return sqlDate;
+    }
+    toSQL_YESNO(yesNo: string): YESNO {
+        if (yesNo.toLowerCase().indexOf('no') > -1) {
+            return 'NO';
+        }
+        return 'YES';
     }
     /**
      * Checks if order with given params is in status OPEN

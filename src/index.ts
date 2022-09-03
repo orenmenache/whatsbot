@@ -48,26 +48,42 @@ async function main() {
     const freeBobsSheet: Sheet = await googleAPI.getFreeBobs();
     const locs = freeBobsSheet.locs;
     const gCheck = googleAPI.checkLast24Hours(freeBobsSheet);
+
     if (gCheck.length > 0) {
-        console.log(`New FreeBOB! Processing`);
+        console.log(`New FreeBOB! getting gOrders`);
         let gOrders: Order[] = [];
-        gCheck.forEach((row) => {
+        for (let row of gCheck) {
             let clientEmail = row[locs['Your email']];
-            let clientName = await db.execute(``);
-        });
+            let clientName = await getClientNameByEmail(db, clientEmail);
+
+            let order = new Order(
+                googleAPI.parseGoogleStrDate(row[locs['Timestamp']]),
+                clientName,
+                clientEmail,
+                row[locs[`Birthday Person's Name`]],
+                row[locs[`Birthday Person's Gender`]],
+                row[locs[`Birthday Person's Age`]],
+                row[
+                    locs[`Would you like Bob to mention Birthday Person's age?`]
+                ],
+                row[locs[`Birthday Person's Selected Quality`]]
+            );
+
+            gOrders.push(order);
+        }
+
+        for (let order of gOrders) {
+            let isProcessed = await order.checkIfProcessed(db);
+            if (!isProcessed) {
+                let result = await order.processIncoming(db);
+                console.log(`Processing... ${result[0].length} row created`);
+            } else {
+                console.log(
+                    `Order ${order.bdpName} ${order.bdpQuality} was processed`
+                );
+            }
+        }
     }
-
-    let dummyStr = 'Fuu';
-
-    let order = new Order(
-        dummyStr,
-        dummyStr,
-        dummyStr,
-        dummyStr,
-        '37',
-        dummyStr,
-        new Date()
-    );
 
     //let result = await getAllOpenOrders(db);
     //console.log(result);
@@ -83,6 +99,26 @@ async function main() {
 }
 
 main();
+
+async function getClientNameByEmail(
+    db: any,
+    clientEmail: string
+): Promise<string> {
+    // Locate Client Name in DB
+    let sql = `
+    SELECT * FROM orders
+    WHERE clientEmail = '${clientEmail}'
+    `;
+
+    let results = (await db.execute(sql)) as any;
+    let clientName = 'NULL';
+    if (results[0].length == 0) {
+        // No clientName found
+    } else {
+        clientName = results[0][0]['clientName'];
+    }
+    return clientName;
+}
 
 // async function mysqlTest() {
 //     let dummyOrder = new Order(

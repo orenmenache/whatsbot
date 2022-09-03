@@ -13,7 +13,7 @@ CREATE TABLE `orders` (
   `bdpName` varchar(50) NOT NULL,
   `bdpGender` varchar(10) NOT NULL,
   `bdpAge` int(3) NOT NULL,
-  'mentionAge' varchar(3) NOT NULL DEFAULT 'YES',
+  `mentionAge` varchar(3) NOT NULL DEFAULT 'YES',
   `bdpQuality` varchar(10) NOT NULL,
   `status` varchar(10) NOT NULL DEFAULT 'OPEN',
   PRIMARY KEY (`orderId`)
