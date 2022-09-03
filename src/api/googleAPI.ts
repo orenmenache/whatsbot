@@ -99,16 +99,14 @@ const googleAPI = {
         return response.status >= 200 && response.status < 300;
     },
 
-    async checkLast24Hours() {
-        const freeBobsSheet = await this.getFreeBobs();
+    checkLast24Hours(freeBobsSheet: Sheet) {
         const { values, locs } = freeBobsSheet;
         let queryResult: string[][] = [];
 
         for (let i = values.length - 1; i > 0; i--) {
             let row: string[] = values[i];
-            let lastDate: string = row[locs['Timestamp']];
-            let isWithinRange: boolean =
-                this.isStrDateWithinLast24Hours(lastDate);
+            let date: Date = this.parseGoogleStrDate(row[locs['Timestamp']]);
+            let isWithinRange: boolean = this.isStrDateWithinLast24Hours(date);
             if (isWithinRange) {
                 queryResult.push(row);
             }
@@ -117,11 +115,16 @@ const googleAPI = {
         return queryResult;
     },
 
-    isStrDateWithinLast24Hours(date: string): boolean {
+    isStrDateWithinLast24Hours(date: Date): boolean {
         const now = new Date();
         const nowParsed = Date.parse(now);
+        let parsed = Date.parse(date);
 
-        let dateTime: string[] = date.split(' ');
+        let gap = (nowParsed - parsed) / (60 * 60 * 1000);
+        return gap <= 24;
+    },
+    parseGoogleStrDate(strDate: string): Date {
+        let dateTime: string[] = strDate.split(' ');
         let splittedDate = dateTime[0].split('/');
         let splittedTime = dateTime[1].split(':');
 
@@ -131,13 +134,8 @@ const googleAPI = {
         let hour = Number(splittedTime[0]);
         let minute = Number(splittedTime[1]);
 
-        let dateDate = new Date(year, month, day, hour, minute);
-        let parsed = Date.parse(dateDate);
-
-        let gap = (nowParsed - parsed) / (60 * 60 * 1000);
-        return gap <= 24;
+        return new Date(year, month, day, hour, minute);
     },
-
     async getFreeBobs() {
         const googleClient = this.createGoogleClient();
 

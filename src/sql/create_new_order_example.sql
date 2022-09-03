@@ -8,6 +8,7 @@ VALUES (
     'testName',
     'Male',
     '123',
+    'YES',
     'Asshole',
     DEFAULT
 )
