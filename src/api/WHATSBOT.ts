@@ -3,21 +3,11 @@ import { Client as WhatsAppClient, LocalAuth } from 'whatsapp-web.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
-//'C:\\Users\\User\\Documents\\programming\\bob\\whatsbot\\src'
-
-//import { schedule } from '../schedule.temp';
-
 type WhatsAppMessage = {
     body: string;
     author: string;
     getChat: () => any;
 };
-
-// type WhatsAppClient = {
-//     sendMessage: (groupId: string, message: string) => Promise<{}>;
-//     on: (actionName: string, callBack: Function) => {};
-//     initialize: () => {};
-// };
 
 class WHATSBOT {
     static autoPath = process.env.WHATSAPP_AUTH_PATH || '';

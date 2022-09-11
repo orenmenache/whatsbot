@@ -67,9 +67,9 @@ class MetaData {
         this.whenString = MISC.formatDateTo_sixDigits(whenCreated);
     }
 }
-class STRIPE {
+class S_SUITE {
     static stripeKey = process.env.STRIPE_SECRET_KEY ?? '';
-    static stripe = require('stripe')(STRIPE.stripeKey);
+    static stripe = require('stripe')(S_SUITE.stripeKey);
 
     constructor() {}
 
@@ -100,7 +100,7 @@ class STRIPE {
 
     async getTransActions(limit: number): Promise<PaymentIntentData[]> {
         const paymentIntents: StripePaymentListResponse =
-            await STRIPE.stripe.paymentIntents.list({
+            await S_SUITE.stripe.paymentIntents.list({
                 limit: limit,
                 //created: { gte: yesterday },
             });
@@ -200,4 +200,4 @@ class STRIPE {
     }
 }
 
-export { STRIPE, StripeJSONResponse, MetaDataObj, MetaData };
+export { S_SUITE, StripeJSONResponse, MetaDataObj, MetaData };
