@@ -4,7 +4,7 @@ dotenv.config();
 import * as mysql from 'mysql2';
 import { STRIPE } from './api/STRIPE';
 
-import { whatsAppAPI } from './api/whatsAppAPI';
+import { WHATSBOT } from './api/WHATSBOT';
 import Sheet from './classes/Sheet';
 import { Order } from './models/Order';
 import { getAllOpenOrders } from './schedule';
@@ -41,25 +41,16 @@ async function main() {
     });
     const db = pool.promise();
 
+    let WHAT = new WHATSBOT();
+    WHAT.client = await WHAT.createWhatsAppClient();
+    await WHAT.logIds();
+
     //whatsAppAPI.chatBot(authPath, adminGroupId);
-    let SS = new STRIPE();
-    let report = await SS.MAIN__processAll(db);
+    //let SS = new STRIPE();
+    //let report = await SS.MAIN__processAll(db);
+    //console.log(report);
 
     db.end();
-
-    console.log(report);
-
-    //let result = await getAllOpenOrders(db);
-    //console.log(result);
-
-    // let isProcessed = await order.checkIfProcessed(db);
-    // if (!isProcessed) {
-    //     console.warn(`Order hasn't been processed`);
-    //     let result = await order.processIncoming(db);
-    //     console.log(result[0]);
-    // } else {
-    //     console.log(`Order processed`);
-    // }
 }
 
 main();

@@ -1,7 +1,7 @@
-import dotenv from 'dotenv';
 import MISC from '../functions/misc';
 import toSingleWordQuality from '../functions/toSingleWordQuality';
 import { Order } from '../models/Order';
+import dotenv from 'dotenv';
 dotenv.config();
 
 type StripeJSONResponse = {
