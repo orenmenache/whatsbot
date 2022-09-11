@@ -43,9 +43,11 @@ async function main() {
 
     //whatsAppAPI.chatBot(authPath, adminGroupId);
     let SS = new STRIPE();
-    await SS.main();
+    let report = await SS.MAIN__processAll(db);
 
     db.end();
+
+    console.log(report);
 
     //let result = await getAllOpenOrders(db);
     //console.log(result);

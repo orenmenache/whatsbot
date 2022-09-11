@@ -3,6 +3,7 @@ dotenv.config();
 import { google } from 'googleapis';
 import Sheet from '../classes/Sheet';
 import getClientNameByEmail from '../functions/getClientNameByEmail';
+import toSingleWordQuality from '../functions/toSingleWordQuality';
 import { Order } from '../models/Order';
 
 class G_SUITE {
@@ -85,7 +86,7 @@ class G_SUITE {
             let clientName = await getClientNameByEmail(db, clientEmail);
 
             // Convert quality to single word lowerCased
-            let quality = this.toSingleWordQuality(
+            let quality = toSingleWordQuality(
                 row[locs[`Birthday Person's Selected Quality`]]
             );
 
@@ -188,27 +189,6 @@ class G_SUITE {
         let minute = Number(splittedTime[1]);
 
         return new Date(year, month, day, hour, minute);
-    }
-    toSingleWordQuality(qualitySentence: string): string {
-        const lower = qualitySentence.toLowerCase();
-        const singleWords = [
-            'animals',
-            'power',
-            'horny',
-            'kids',
-            'multitasking',
-            'gardening',
-            'creative',
-            'funny',
-            'optimistic',
-            'surprises',
-        ];
-        for (let quality of singleWords) {
-            if (lower.indexOf(quality) > -1) {
-                return quality;
-            }
-        }
-        return 'NULL';
     }
 }
 

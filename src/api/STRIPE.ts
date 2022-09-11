@@ -1,7 +1,6 @@
-import axios from 'axios';
 import dotenv from 'dotenv';
 import MISC from '../functions/misc';
-import ORGANIZE from '../functions/organize';
+import toSingleWordQuality from '../functions/toSingleWordQuality';
 import { Order } from '../models/Order';
 dotenv.config();
 
@@ -74,63 +73,29 @@ class STRIPE {
 
     constructor() {}
 
-    async MAIN__processAll(): Promise<any | false> {
+    async MAIN__processAll(db: any): Promise<string> {
         console.log(`%cStripe Main`, 'color: pink');
 
         // Get last 100 transactions
         let transActions = await this.getTransActions(100);
         // Filter transActions from the last 24 hours
-        let last24Hours = this.filterLast24Hours(transActions);
+        let last24Hours__PID: PaymentIntentData[] =
+            this.filterLast24Hours(transActions);
 
         console.log(
-            `%ctransActions.length ${last24Hours.length}`,
+            `%ctransActions.length ${last24Hours__PID.length}`,
             'color: orange'
         );
 
-        // const listLength = paymentIntents.data.length;
-        // console.log(paymentIntents);
-        // console.log(listLength);
-        // console.log(paymentIntents);
-        // console.log(paymentIntents.data);
+        let last24Hours__ORDERS: Order[] =
+            this.convertToOrders(last24Hours__PID);
 
-        // for (let p of paymentIntents.data) {
-        //     for (let n in p) {
-        //         console.log(`n ${n} ${p[n]}`);
-        //     }
-        // }
+        let report: string = await this.processTheUnprocessed(
+            db,
+            last24Hours__ORDERS
+        );
 
-        // for (let trans of transactions) {
-        //     for (let n in trans) {
-        //         //@ts-ignore
-        //         console.log(`n ${n} ${trans[n]}`);
-        //     }
-        // }
-
-        // for (let i = 0; i < transactions.length; i++) {
-        //     let trans = transactions[i];
-        //     console.log(
-        //         `when: ${trans.whenString} yesterDayFormatted: ${yesterdayFormatted}`
-        //     );
-        //     if (
-        //         trans.whenString != nowFormatted &&
-        //         trans.whenString != yesterdayFormatted
-        //     ) {
-        //         console.log(`when the day is done`);
-        //         return true;
-        //     }
-        //     let name = trans.bdPersonName;
-        //     let result = ORGANIZE.writeTxtFile(trans, waitingFolderPath);
-        //     if (!result) {
-        //         console.warn(`Couldn't create file ${trans.bdPersonName}`);
-        //     } else {
-        //         console.log(`txt file ${trans.bdPersonName} created`);
-        //     }
-        //     if (!namesAudio.has(name)) {
-        //         console.log(`You need to record this name: ${name}`);
-        //     }
-        // }
-
-        //let res = await stripeAxiosGet(`${stripeAPIbaseUrl}/v1/balance_transactions`);
+        return report;
     }
 
     async getTransActions(limit: number): Promise<PaymentIntentData[]> {
@@ -158,7 +123,7 @@ class STRIPE {
                 let createdSec = Number(transAction.created);
                 let secondsGap = nowSeconds - createdSec;
                 let hoursAgo = Math.floor(secondsGap / (60 * 60));
-                let isUnder24hoursAgo = hoursAgo <= 24;
+                let isUnder24hoursAgo = hoursAgo <= 1000;
                 return isUnder24hoursAgo;
             }
         );
@@ -182,7 +147,7 @@ class STRIPE {
             meta.bdPersonGender,
             meta.bdPersonAge.toString(),
             meta.bdPersonMentionAge,
-            meta.bdPersonQuality
+            toSingleWordQuality(meta.bdPersonQuality)
         );
         return sOrder;
     }
@@ -233,42 +198,6 @@ class STRIPE {
             return `Failed to processTheUnprocessed: ${e}`;
         }
     }
-    // async getTransactions__OLD__UsingAxios(): Promise<MetaData[]> {
-    //     const stripeAPIbaseUrl = `https://api.stripe.com`;
-    //     let res = await this.axiosGet(`${stripeAPIbaseUrl}/v1/payment_intents`);
-
-    //     let intents: MetaData[] = [];
-    //     if (res) {
-    //         let paymentIntents = res.data.data;
-    //         for (let i = 0; i < paymentIntents.length; i++) {
-    //             let intent = paymentIntents[i];
-    //             let whenCreated = new Date(Number(intent.created) * 1000);
-    //             let metaData = new MetaData(intent.metadata, whenCreated);
-    //             intents.push(metaData);
-    //         }
-    //     }
-    //     return intents;
-    // }
-    // async axiosGet(URL: string): Promise<StripeJSONResponse | false> {
-    //     let runThis: any = {
-    //         method: 'get',
-    //         url: URL,
-    //         headers: { Authorization: `Bearer ${STRIPE.stripeKey}` },
-    //     };
-    //     try {
-    //         let response = (await axios(runThis)) as unknown;
-    //         //console.log(response);
-    //         if (this.isPositiveResponse(response)) {
-    //             return response as StripeJSONResponse;
-    //         }
-    //     } catch (e) {
-    //         console.warn(`${e}`);
-    //     }
-    //     return false;
-    // }
-    // isPositiveResponse(response: any) {
-    //     return response.status >= 200 && response.status < 300;
-    // }
 }
 
 export { STRIPE, StripeJSONResponse, MetaDataObj, MetaData };
