@@ -19,6 +19,30 @@ class G_SUITE {
         this.client = this.createGoogleClient();
     }
 
+    async MAIN__processAll(db: any): Promise<string> {
+        try {
+            console.log(`%cRunning G_SUITE MAIN`, 'color: pink');
+            const freeBobsSheet: Sheet = await this.getFreeBobs();
+            const locs = freeBobsSheet.locs;
+            const gCheckRawValues: string[][] =
+                this.checkLast24Hours(freeBobsSheet);
+
+            if (gCheckRawValues.length > 0) {
+                console.log(`New FreeBOB! getting gOrders`);
+
+                const gOrders: Order[] = await this.convertToOrders(
+                    db,
+                    gCheckRawValues,
+                    locs
+                );
+                let report = await this.processTheUnprocessed(db, gOrders);
+                return report;
+            }
+            return 'Nothin to do here';
+        } catch (e) {
+            return `Failed to run googleAPI.main: ${e}`;
+        }
+    }
     createGoogleClient() {
         let client = new google.auth.JWT(
             G_SUITE.config.client_email,
@@ -49,29 +73,6 @@ class G_SUITE {
 
         await freeBobsSheet.getValues();
         return freeBobsSheet;
-    }
-    async processAll(db: any): Promise<string> {
-        try {
-            const freeBobsSheet: Sheet = await this.getFreeBobs();
-            const locs = freeBobsSheet.locs;
-            const gCheckRawValues: string[][] =
-                this.checkLast24Hours(freeBobsSheet);
-
-            if (gCheckRawValues.length > 0) {
-                console.log(`New FreeBOB! getting gOrders`);
-
-                const gOrders: Order[] = await this.convertToOrders(
-                    db,
-                    gCheckRawValues,
-                    locs
-                );
-                let report = await this.processTheUnprocessed(db, gOrders);
-                return report;
-            }
-            return 'Nothin to do here';
-        } catch (e) {
-            return `Failed to run googleAPI.main: ${e}`;
-        }
     }
     async convertToOrders(
         db: any,

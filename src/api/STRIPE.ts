@@ -71,22 +71,11 @@ class MetaData {
 class STRIPE {
     static stripeKey = process.env.STRIPE_SECRET_KEY ?? '';
     static stripe = require('stripe')(STRIPE.stripeKey);
-    static waitingFolderPath = process.env.WAITING_FOLDER_PATH ?? '';
-    static nameAudioFolderPath = process.env.NAMEAUDIO_FOLDER_PATH ?? '';
 
     constructor() {}
 
-    async main(): Promise<any | false> {
+    async MAIN__processAll(): Promise<any | false> {
         console.log(`%cStripe Main`, 'color: pink');
-
-        // Get namesAudio:
-        let namesAudio: false | Set<string> = ORGANIZE.getNamesAudioSet(
-            STRIPE.nameAudioFolderPath
-        );
-        if (!namesAudio) {
-            console.warn(`Cannot get namesAudio`);
-            return false;
-        }
 
         // Get last 100 transactions
         let transActions = await this.getTransActions(100);
