@@ -11,20 +11,22 @@ class SCHEDULE {
 
     constructor() {}
     async MAIN() {
-        sch.scheduleJob(SCHEDULE.cron, async (): Promise<void> => {
-            this.MANUAL__processAll();
-            // Check last 24 hours in GS and Stripe
-            // Check GS
-            // Check Stripe
-            // Check DB
-        });
-    }
-    async MANUAL__processAll() {
         let WHAT = new WHATSBOT();
         await WHAT.createWhatsAppClient();
 
+        sch.scheduleJob(SCHEDULE.cron, async (): Promise<void> => {
+            let openOrders: Order[] = await this.MANUAL__processAll();
+            if (openOrders.length > 0) {
+                WHAT.sendMessage(`openOrderLength: ${openOrders.length}`);
+            }
+        });
+    }
+    async MANUAL__processAll() {
+        console.log(`MANUAL__processAll DB`);
         let DB = new DB_Handler();
+        console.log(`MANUAL__processAll GOOGLE`);
         let GOOGLE = new G_SUITE();
+        console.log(`MANUAL__processAll STRIPE`);
         let STRIPE = new S_SUITE();
 
         // Populate DB with data from Google and Stripe
@@ -33,7 +35,9 @@ class SCHEDULE {
 
         // Get all orders with status OPEN from db
         let openOrders: Order[] = await this.getAllOpenOrders(DB.db);
-        console.log(openOrders.length);
+        console.log(`OpenOrder Length: ${openOrders.length}`);
+        DB.db.end();
+        return openOrders;
     }
 
     async getAllOpenOrders(db: any): Promise<Order[]> {
@@ -44,11 +48,11 @@ class SCHEDULE {
         const result = await db.execute(sql);
         const openOrders: Order[] = result[0];
 
-        for (let order of openOrders) {
-            for (let prop in order) {
-                console.log(`prop ${prop} ${order[prop as keyof Order]}`);
-            }
-        }
+        // for (let order of openOrders) {
+        //     for (let prop in order) {
+        //         console.log(`prop ${prop} ${order[prop as keyof Order]}`);
+        //     }
+        // }
 
         return openOrders;
     }

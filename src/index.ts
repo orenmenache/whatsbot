@@ -20,7 +20,7 @@ import { SCHEDULE } from './classes/SCHEDULE';
 
 async function main() {
     let SCH = new SCHEDULE();
-    await SCH.MANUAL__processAll();
+    await SCH.MAIN();
     //db.end();
 }
 
