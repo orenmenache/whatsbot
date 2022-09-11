@@ -42,7 +42,7 @@ class WHATSBOT {
                     console.log('whatsAppClient is ready!');
                     await whatsAppClient.sendMessage(
                         WHATSBOT.adminGroupId,
-                        `I'm ready`
+                        `Ahoy there`
                     );
                     resolve(whatsAppClient);
                 });

@@ -8,20 +8,24 @@ import { DB_Handler } from './DB_Handler';
 class SCHEDULE {
     // Run every 6 hours
     static cron: string = `0 */6 * * *`;
+    // Run every 2 minutes
+    static testCron: string = `*/2 * * * *`;
 
     constructor() {}
     async MAIN() {
         let WHAT = new WHATSBOT();
-        await WHAT.createWhatsAppClient();
+        WHAT.client = await WHAT.createWhatsAppClient();
 
         sch.scheduleJob(SCHEDULE.cron, async (): Promise<void> => {
             let openOrders: Order[] = await this.MANUAL__processAll();
             if (openOrders.length > 0) {
+                console.warn(WHAT);
+                console.warn(WHAT.client);
                 WHAT.sendMessage(`openOrderLength: ${openOrders.length}`);
             }
         });
     }
-    async MANUAL__processAll() {
+    async MANUAL__processAll(): Promise<Order[]> {
         console.log(`MANUAL__processAll DB`);
         let DB = new DB_Handler();
         console.log(`MANUAL__processAll GOOGLE`);
