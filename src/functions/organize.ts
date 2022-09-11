@@ -1,12 +1,12 @@
 import * as fs from 'fs';
 import * as pathLib from 'path';
-import { MetaData } from '../api/stripeAPI';
+import { MetaData } from '../api/STRIPE';
 import FolderHandler from '../classes/Handler/FolderHandler';
 
 const ORGANIZE = {
     getNamesAudioSet(nameAudioFolderPath: string): Set<string> | false {
         if (!fs.existsSync(nameAudioFolderPath)) {
-            console.log(`Cannot find waiting folder`);
+            console.warn(`Cannot find waiting folder`);
             return false;
         }
         const nameAudioFolder = new FolderHandler(nameAudioFolderPath);
