@@ -26,7 +26,7 @@ class Order {
         this.clientEmail = clientEmail;
         this.bdpName = bdpName;
         this.bdpGender = bdpGender;
-        this.bdpAge = bdpAge;
+        this.bdpAge = bdpAge.trim() == '' ? '29' : bdpAge;
         this.mentionAge = this.toSQL_YESNO(mentionAge);
         this.bdpQuality = bdpQuality;
         this.date = date;
@@ -35,8 +35,12 @@ class Order {
     }
     /**
      * Inserts order into DB
+     * Assumes the order doesn't exist already
      */
-    async processIncoming(db: any) {
+    async process__WithStatusOpen(db: any) {
+        // Deal with possible NULL values
+        let bdPersonName =
+            this.bdpName.trim() == '' ? 'NULL' : `'${this.bdpName}'`;
         let sql = `
             INSERT INTO orders
             VALUES (
@@ -44,7 +48,7 @@ class Order {
                 '${this.sqlDate}',
                 '${this.clientName}',
                 '${this.clientEmail}',
-                '${this.bdpName}',
+                ${bdPersonName},
                 '${this.bdpGender}',
                 '${this.bdpAge}',
                 '${this.mentionAge}',
@@ -80,8 +84,8 @@ class Order {
             WHERE (
                 bdpName = '${this.bdpName}' AND
                 clientName = '${this.clientName}' AND
-                orderDate = '${this.sqlDate}' AND
-                status = 'OPEN'
+                bdpQuality = '${this.bdpQuality}' AND
+                orderDate = '${this.sqlDate}'
             )
         `;
 
