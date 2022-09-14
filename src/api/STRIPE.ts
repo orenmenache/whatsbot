@@ -123,7 +123,7 @@ class S_SUITE {
                 let createdSec = Number(transAction.created);
                 let secondsGap = nowSeconds - createdSec;
                 let hoursAgo = Math.floor(secondsGap / (60 * 60));
-                let isUnder24hoursAgo = hoursAgo <= 1000;
+                let isUnder24hoursAgo = hoursAgo <= 24;
                 return isUnder24hoursAgo;
             }
         );
