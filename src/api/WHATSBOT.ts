@@ -48,8 +48,8 @@ class WHATSBOT {
                 });
             });
         } catch (e) {
-            console.warn(`Error initializing whatsAppClient: ${e}`);
-            return false;
+            this.client = false;
+            throw `Error initializing whatsAppClient: ${e}`;
         }
     }
     async logIds() {
