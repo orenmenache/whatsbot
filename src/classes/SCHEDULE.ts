@@ -13,52 +13,64 @@ class SCHEDULE {
 
     constructor() {}
     async MAIN() {
-        let WHAT = new WHATSBOT();
-        WHAT.client = await WHAT.createWhatsAppClient();
+        try {
+            let WHAT = new WHATSBOT();
+            WHAT.client = await WHAT.createWhatsAppClient();
 
-        sch.scheduleJob(SCHEDULE.cron, async (): Promise<void> => {
-            let openOrders: Order[] = await this.MANUAL__processAll();
-            if (openOrders.length > 0) {
-                console.warn(WHAT);
-                console.warn(WHAT.client);
-                WHAT.sendMessage(`openOrderLength: ${openOrders.length}`);
-            }
-        });
+            sch.scheduleJob(SCHEDULE.cron, async (): Promise<void> => {
+                let openOrders: Order[] = await this.MANUAL__processAll();
+                if (openOrders.length > 0) {
+                    console.warn(WHAT);
+                    console.warn(WHAT.client);
+                    WHAT.sendMessage(`openOrderLength: ${openOrders.length}`);
+                }
+            });
+        } catch (e) {
+            throw `Error in Main ${e}`;
+        }
     }
     async MANUAL__processAll(): Promise<Order[]> {
-        console.log(`MANUAL__processAll DB`);
-        let DB = new DB_Handler();
-        console.log(`MANUAL__processAll GOOGLE`);
-        let GOOGLE = new G_SUITE();
-        console.log(`MANUAL__processAll STRIPE`);
-        let STRIPE = new S_SUITE();
+        try {
+            console.log(`MANUAL__processAll DB`);
+            let DB = new DB_Handler();
+            console.log(`MANUAL__processAll GOOGLE`);
+            let GOOGLE = new G_SUITE();
+            console.log(`MANUAL__processAll STRIPE`);
+            let STRIPE = new S_SUITE();
 
-        // Populate DB with data from Google and Stripe
-        await GOOGLE.MAIN__processAll(DB.db);
-        await STRIPE.MAIN__processAll(DB.db);
+            // Populate DB with data from Google and Stripe
+            await GOOGLE.MAIN__processAll(DB.db);
+            await STRIPE.MAIN__processAll(DB.db);
 
-        // Get all orders with status OPEN from db
-        let openOrders: Order[] = await this.getAllOpenOrders(DB.db);
-        console.log(`OpenOrder Length: ${openOrders.length}`);
-        DB.db.end();
-        return openOrders;
+            // Get all orders with status OPEN from db
+            let openOrders: Order[] = await this.getAllOpenOrders(DB.db);
+            console.log(`OpenOrder Length: ${openOrders.length}`);
+            DB.db.end();
+            return openOrders;
+        } catch (e) {
+            throw `Error in MANUAL__processAll: ${e}`;
+        }
     }
 
     async getAllOpenOrders(db: any): Promise<Order[]> {
-        const sql = `
-        SELECT * FROM orders
-        WHERE status = 'OPEN';
-    `;
-        const result = await db.execute(sql);
-        const openOrders: Order[] = result[0];
+        try {
+            const sql = `
+            SELECT * FROM orders
+            WHERE status = 'OPEN';
+        `;
+            const result = await db.execute(sql);
+            const openOrders: Order[] = result[0];
 
-        // for (let order of openOrders) {
-        //     for (let prop in order) {
-        //         console.log(`prop ${prop} ${order[prop as keyof Order]}`);
-        //     }
-        // }
+            // for (let order of openOrders) {
+            //     for (let prop in order) {
+            //         console.log(`prop ${prop} ${order[prop as keyof Order]}`);
+            //     }
+            // }
 
-        return openOrders;
+            return openOrders;
+        } catch (e) {
+            throw `Error in getAllOpenOrders: ${e}`;
+        }
     }
 }
 

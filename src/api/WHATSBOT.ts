@@ -19,8 +19,8 @@ class WHATSBOT {
         this.client = {} as false | WhatsAppClient;
     }
     async createWhatsAppClient(): Promise<false | WhatsAppClient> {
-        try {
-            return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
+            try {
                 const whatsAppClient = new WhatsAppClient({
                     authStrategy: new LocalAuth({
                         clientId: undefined,
@@ -46,11 +46,10 @@ class WHATSBOT {
                     );
                     resolve(whatsAppClient);
                 });
-            });
-        } catch (e) {
-            this.client = false;
-            throw `Error initializing whatsAppClient: ${e}`;
-        }
+            } catch (e) {
+                throw `Error in createWhatsAppClient ${e}`;
+            }
+        });
     }
     async logIds() {
         if (!this.client) {
@@ -67,7 +66,7 @@ class WHATSBOT {
     }
     async sendMessage(message: string) {
         if (!this.client) {
-            return false;
+            throw `Error in sendMessage: No Client`;
         }
         await this.client.sendMessage(WHATSBOT.adminGroupId, message);
     }

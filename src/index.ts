@@ -19,9 +19,12 @@
 import { SCHEDULE } from './classes/SCHEDULE';
 
 async function main() {
-    let SCH = new SCHEDULE();
-    await SCH.MAIN();
-    //db.end();
+    try {
+        let SCH = new SCHEDULE();
+        await SCH.MAIN();
+    } catch (e) {
+        console.warn(`${e}`);
+    }
 }
 
 main();
